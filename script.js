@@ -19,15 +19,17 @@ function loadProducts() {
     } else {
         // Sample products
         products = [
-            { id: 1, name: 'Paracetamol 500mg', category: 'Pain Relief', company: 'Cipla', price: '₹120/strip', description: 'Effective pain and fever relief', stock: 'In Stock' },
-            { id: 2, name: 'Amoxicillin 250mg', category: 'Antibiotics', company: 'Sun Pharma', price: '₹250/strip', description: 'Broad-spectrum antibiotic', stock: 'In Stock' },
-            { id: 3, name: 'Vitamin D3 60K', category: 'Vitamins', company: 'Zydus', price: '₹180/strip', description: 'Bone health supplement', stock: 'In Stock' },
-            { id: 4, name: 'Omeprazole 20mg', category: 'Digestive', company: 'Cipla', price: '₹150/strip', description: 'Acid reflux treatment', stock: 'In Stock' },
-            { id: 5, name: 'Cetirizine 10mg', category: 'Antihistamine', company: 'Glenmark', price: '₹90/strip', description: 'Allergy relief medication', stock: 'In Stock' },
-            { id: 6, name: 'Metformin 500mg', category: 'Diabetes', company: 'Sun Pharma', price: '₹200/strip', description: 'Blood sugar management', stock: 'In Stock' }
+            { id: 1, name: 'Paracetamol 500mg', category: 'Pain Relief', company: 'Cipla', price: '120', description: 'Effective pain and fever relief', stock: 'In Stock', packingType: 'Strip', composition: 'Paracetamol 500mg', unitsPerPack: '10', gstRate: '12%' },
+            { id: 2, name: 'Amoxicillin 250mg', category: 'Antibiotics', company: 'Sun Pharma', price: '250', description: 'Broad-spectrum antibiotic', stock: 'In Stock', packingType: 'Strip', composition: 'Amoxicillin 250mg', unitsPerPack: '10', gstRate: '12%' },
+            { id: 3, name: 'Vitamin D3 60K', category: 'Vitamins', company: 'Zydus', price: '180', description: 'Bone health supplement', stock: 'In Stock', packingType: 'Strip', composition: 'Cholecalciferol 60000 IU', unitsPerPack: '4', gstRate: '12%' },
+            { id: 4, name: 'Omeprazole 20mg', category: 'Digestive', company: 'Cipla', price: '150', description: 'Acid reflux treatment', stock: 'In Stock', packingType: 'Strip', composition: 'Omeprazole 20mg', unitsPerPack: '10', gstRate: '12%' },
+            { id: 5, name: 'Cetirizine 10mg', category: 'Antihistamine', company: 'Glenmark', price: '90', description: 'Allergy relief medication', stock: 'In Stock', packingType: 'Strip', composition: 'Cetirizine 10mg', unitsPerPack: '10', gstRate: '12%' },
+            { id: 6, name: 'Metformin 500mg', category: 'Diabetes', company: 'Sun Pharma', price: '200', description: 'Blood sugar management', stock: 'In Stock', packingType: 'Strip', composition: 'Metformin 500mg', unitsPerPack: '10', gstRate: '12%' }
         ];
         saveProducts();
     }
+    // Set global products for use in other pages
+    window.products = products;
     renderProducts();
     updateCategories();
     updateCompanies();
@@ -40,10 +42,41 @@ function saveProducts() {
     updateProductCount();
 }
 
+// Get packing type CSS class
+function getPackingTypeClass(packingType) {
+    if (!packingType) return '';
+    const normalized = packingType.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const mapping = {
+        'strip': 'packing-strip',
+        'alu-alu': 'packing-alu-alu',
+        'bottle': 'packing-bottle',
+        'syrup': 'packing-syrup',
+        'inhaler': 'packing-inhaler',
+        'tube': 'packing-tube',
+        'cream': 'packing-cream',
+        'sachet': 'packing-sachet',
+        'lozenge': 'packing-lozenge'
+    };
+    return mapping[normalized] || 'packing-strip';
+}
+
+// Get packing type badge HTML
+function getPackingTypeBadge(product) {
+    if (!product.packingType) return '';
+    const className = getPackingTypeClass(product.packingType);
+    return `<span class="packing-badge ${className}">${product.packingType}</span>`;
+}
+
+// Expose functions globally for use in HTML pages
+window.getPackingTypeClass = getPackingTypeClass;
+window.getPackingTypeBadge = getPackingTypeBadge;
+
 // Render products
 function renderProducts() {
     const grid = document.getElementById('productGrid');
     const emptyState = document.getElementById('emptyState');
+    // If not on products page, safely exit
+    if (!grid || !emptyState) return;
 
     if (products.length === 0) {
         grid.innerHTML = '';
@@ -52,30 +85,37 @@ function renderProducts() {
     }
 
     emptyState.classList.add('hidden');
-    grid.innerHTML = products.map(product => `
+    grid.innerHTML = products.map(product => {
+        const productName = product.name || 'Unnamed Product';
+        const productPrice = product.price || '0';
+        const productCategory = product.category || 'General';
+        const productDescription = product.description || '';
+        return `
                 <div class="card-hover bg-white rounded-xl shadow-md overflow-hidden cursor-pointer" onclick="window.location.href='productdetial.html?id=${product.id}'">
                     <div class="bg-gradient-to-br from-blue-500 to-blue-600 h-32 flex items-center justify-center">
                         <i class="fas fa-capsules text-6xl text-white opacity-80"></i>
                     </div>
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-lg text-gray-800 line-clamp-2">${product.name}</h3>
+                            <h3 class="font-bold text-lg text-gray-800 line-clamp-2">${productName}</h3>
                             ${product.stock === 'In Stock' ? '<span class="text-green-600 text-xs font-semibold"><i class="fas fa-check-circle"></i></span>' : '<span class="text-red-600 text-xs font-semibold">Out</span>'}
                         </div>
                         ${product.company ? `<p class="text-xs text-blue-600 mb-1 font-semibold"><i class="fas fa-industry"></i> ${product.company}</p>` : ''}
-                        <p class="text-sm text-gray-600 mb-3 line-clamp-2">${product.description}</p>
-                        <div class="mb-3">
-                            <span class="category-badge">${product.category}</span>
+                        <p class="text-sm text-gray-600 mb-3 line-clamp-2">${productDescription}</p>
+                        <div class="mb-3 flex flex-wrap gap-2">
+                            <span class="category-badge">${productCategory}</span>
+                            ${getPackingTypeBadge(product)}
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xl font-bold text-blue-600">${product.price}</span>
+                            <span class="text-xl font-bold text-blue-600">₹${productPrice}</span>
                             <button onclick="event.stopPropagation(); addToCart(${product.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold transition">
                                 <i class="fas fa-plus mr-1"></i> Add
                             </button>
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `;
+    }).join('');
 }
 
 // Filter products
@@ -102,30 +142,37 @@ function filterProducts() {
         emptyState.classList.remove('hidden');
     } else {
         emptyState.classList.add('hidden');
-        grid.innerHTML = filtered.map(product => `
+        grid.innerHTML = filtered.map(product => {
+            const productName = product.name || 'Unnamed Product';
+            const productPrice = product.price || '0';
+            const productCategory = product.category || 'General';
+            const productDescription = product.description || '';
+            return `
                     <div class="card-hover bg-white rounded-xl shadow-md overflow-hidden cursor-pointer" onclick="window.location.href='productdetial.html?id=${product.id}'">
                         <div class="bg-gradient-to-br from-blue-500 to-blue-600 h-32 flex items-center justify-center">
                             <i class="fas fa-capsules text-6xl text-white opacity-80"></i>
                         </div>
                         <div class="p-5">
                             <div class="flex justify-between items-start mb-2">
-                                <h3 class="font-bold text-lg text-gray-800 line-clamp-2">${product.name}</h3>
+                                <h3 class="font-bold text-lg text-gray-800 line-clamp-2">${productName}</h3>
                                 ${product.stock === 'In Stock' ? '<span class="text-green-600 text-xs font-semibold"><i class="fas fa-check-circle"></i></span>' : '<span class="text-red-600 text-xs font-semibold">Out</span>'}
                             </div>
                             ${product.company ? `<p class="text-xs text-blue-600 mb-1 font-semibold"><i class="fas fa-industry"></i> ${product.company}</p>` : ''}
-                            <p class="text-sm text-gray-600 mb-3 line-clamp-2">${product.description}</p>
-                            <div class="mb-3">
-                                <span class="category-badge">${product.category}</span>
+                            <p class="text-sm text-gray-600 mb-3 line-clamp-2">${productDescription}</p>
+                            <div class="mb-3 flex flex-wrap gap-2">
+                                <span class="category-badge">${productCategory}</span>
+                                ${getPackingTypeBadge(product)}
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-xl font-bold text-blue-600">${product.price}</span>
+                                <span class="text-xl font-bold text-blue-600">₹${productPrice}</span>
                                 <button onclick="event.stopPropagation(); addToCart(${product.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold transition">
                                     <i class="fas fa-plus mr-1"></i> Add
                                 </button>
                             </div>
                         </div>
                     </div>
-                `).join('');
+                `;
+        }).join('');
     }
 }
 
@@ -141,8 +188,10 @@ function clearFilters() {
 function updateCategories() {
     allCategories = new Set(products.map(p => p.category));
     const select = document.getElementById('categoryFilter');
-    select.innerHTML = '<option value="">All Categories</option>' +
-        Array.from(allCategories).map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    if (select) {
+        select.innerHTML = '<option value="">All Categories</option>' +
+            Array.from(allCategories).map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    }
 }
 
 // Update companies dropdown
@@ -213,6 +262,11 @@ function updateCartUI() {
     const emptyCart = document.getElementById('emptyCart');
     const cartFooter = document.getElementById('cartFooter');
 
+    // If the page doesn't have cart UI elements, skip updating
+    if (!badge || !cartItems || !emptyCart || !cartFooter) {
+        return;
+    }
+
     if (cart.length === 0) {
         badge.classList.add('hidden');
         cartItems.innerHTML = '';
@@ -253,12 +307,20 @@ function updateCartUI() {
 }
 
 function openCart() {
-    document.getElementById('cartModal').classList.remove('hidden');
+    const modal = document.getElementById('cartModal');
+    if (!modal) {
+        // Gracefully handle pages without a cart modal
+        showToast('🛒', 'Cart is available on the Products page.', 'info');
+        return;
+    }
+    modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
 
 function closeCart() {
-    document.getElementById('cartModal').classList.add('hidden');
+    const modal = document.getElementById('cartModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
 }
 
@@ -439,21 +501,50 @@ function parseCSV(csvText) {
         return;
     }
 
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    // Parse CSV considering quoted fields
+    function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                result.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        result.push(current.trim());
+        return result;
+    }
+
+    const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase().replace(/"/g, ''));
     const newProducts = [];
 
     for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        if (values.length < 4) continue;
+        const values = parseCSVLine(lines[i]).map(v => v.trim().replace(/^"|"$/g, ''));
+        if (values.length < 3) continue;
+
+        const getValue = (key) => {
+            const idx = headers.indexOf(key.toLowerCase());
+            return idx >= 0 && values[idx] ? values[idx] : '';
+        };
 
         const product = {
             id: Date.now() + i,
-            name: values[headers.indexOf('name')] || 'Unnamed Product',
-            category: values[headers.indexOf('category')] || 'General',
-            company: values[headers.indexOf('company')] || '',
-            price: values[headers.indexOf('price')] || '₹0',
-            description: values[headers.indexOf('description')] || 'No description',
-            stock: values[headers.indexOf('stock')] || 'In Stock'
+            company: getValue('company') || '',
+            name: getValue('product name') || getValue('name') || 'Unnamed Product',
+            composition: getValue('composition') || '',
+            category: getValue('category') || 'General',
+            price: getValue('price (₹)') || getValue('price') || '0',
+            packingType: getValue('packing type') || 'Strip',
+            unitsPerPack: getValue('units/pack') || '',
+            gstRate: getValue('gst rate') || '',
+            stock: getValue('stock') || 'In Stock',
+            description: getValue('description') || `${getValue('composition') || 'Quality medicine'}`
         };
 
         newProducts.push(product);
@@ -461,46 +552,164 @@ function parseCSV(csvText) {
 
     if (newProducts.length > 0) {
         products = newProducts;
+        window.products = products;
         saveProducts();
         renderProducts();
         updateCategories();
         updateCompanies();
         showToast('✓', `Successfully imported ${newProducts.length} products!`, 'success');
         closeAdminPanel();
+
+        // Reload page if on products page to refresh display
+        if (window.location.pathname.includes('products.html')) {
+            setTimeout(() => window.location.reload(), 500);
+        }
     } else {
         showToast('❌', 'No valid products found in CSV', 'error');
     }
 }
 
 async function importFromSheets() {
-    const url = document.getElementById('sheetsUrl').value.trim();
+    const urlInput = document.getElementById('sheetsUrl');
+    if (!urlInput) {
+        showToast('❌', 'URL input not found', 'error');
+        return;
+    }
+
+    const url = urlInput.value.trim();
     if (!url) {
         showToast('❌', 'Please enter a Google Sheets URL', 'error');
         return;
     }
 
-    // Convert Google Sheets URL to CSV export URL
-    let csvUrl = url;
-    if (url.includes('/edit')) {
-        csvUrl = url.replace('/edit', '/export?format=csv');
-    } else if (!url.includes('/export')) {
-        csvUrl = url + '/export?format=csv';
+    // Extract sheet ID and gid from URL
+    let sheetId = '';
+    let gid = '0';
+
+    if (url.includes('/spreadsheets/d/')) {
+        const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+            sheetId = match[1];
+        }
+        const gidMatch = url.match(/[#&]gid=(\d+)/);
+        if (gidMatch && gidMatch[1]) {
+            gid = gidMatch[1];
+        }
+    } else {
+        showToast('❌', 'Invalid Google Sheets URL format. Please use the full URL from your browser.', 'error');
+        return;
     }
 
-    try {
-        showToast('⏳', 'Importing from Google Sheets...', 'info');
-        const response = await fetch(csvUrl);
-        if (!response.ok) throw new Error('Failed to fetch');
-        const csvText = await response.text();
-        parseCSV(csvText);
-    } catch (error) {
-        showToast('❌', 'Failed to import. Make sure the sheet is public and the URL is correct.', 'error');
+    if (!sheetId) {
+        showToast('❌', 'Could not extract sheet ID from URL', 'error');
+        return;
     }
+
+    // Try multiple URL formats (Google Sheets has CORS restrictions, so we try different endpoints)
+    const csvUrls = [
+        // Method 1: Using gviz endpoint (works if sheet is published to web)
+        `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}`,
+        // Method 2: Standard export endpoint
+        `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`,
+        // Method 3: Export without gid (uses first sheet)
+        `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`,
+        // Method 4: gviz without gid
+        `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`
+    ];
+
+    showToast('⏳', 'Importing from Google Sheets...', 'info');
+
+    let lastError = null;
+
+    // Try each URL format
+    for (let i = 0; i < csvUrls.length; i++) {
+        try {
+            const response = await fetch(csvUrls[i], {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'text/csv'
+                }
+            });
+
+            if (response.ok) {
+                const csvText = await response.text();
+
+                // Check if response is valid CSV (not an error page)
+                if (csvText && csvText.trim().length > 0 && !csvText.includes('<!DOCTYPE html>') && !csvText.includes('Error')) {
+                    parseCSV(csvText);
+                    return; // Success!
+                }
+            } else if (response.status === 403) {
+                lastError = new Error('Access denied. Please ensure the sheet is shared publicly.');
+                continue; // Try next URL
+            }
+        } catch (error) {
+            lastError = error;
+            // Continue to next URL if this one fails
+            continue;
+        }
+    }
+
+    // If all methods failed
+    console.error('All import methods failed:', lastError);
+
+    let errorMsg = 'Failed to import from Google Sheets. ';
+    errorMsg += '\n\nTo fix this:\n';
+    errorMsg += '1. Open your Google Sheet\n';
+    errorMsg += '2. Click "File" > "Share" > "Change to anyone with the link"\n';
+    errorMsg += '3. OR use "File" > "Publish to web" > Select CSV format > Publish\n';
+    errorMsg += '4. Copy the published link or share link and try again\n\n';
+    errorMsg += 'Alternatively, download the sheet as CSV and upload it directly.';
+    
+    showToast('❌', errorMsg, 'error');
+    
+    // Show a more detailed error in console for debugging
+    console.log('Sheet ID:', sheetId);
+    console.log('GID:', gid);
+    console.log('Tried URLs:', csvUrls);
+}
+
+function downloadCSV() {
+    if (products.length === 0) {
+        showToast('⚠️', 'No products to download', 'warning');
+        return;
+    }
+
+    const headers = ['Company', 'Product Name', 'Composition', 'Description', 'Category', 'Price (₹)', 'Packing Type', 'Units/Pack', 'GST Rate', 'Stock'];
+    const csvContent = [
+        headers.join(','),
+        ...products.map(p => [
+            `"${p.company || ''}"`, // Enclose in quotes to handle commas in data
+            `"${p.name || ''}"`,
+            `"${p.composition || ''}"`,
+            `"${p.description || ''}"`,
+            `"${p.category || ''}"`,
+            `"${p.price || ''}"`,
+            `"${p.packingType || ''}"`,
+            `"${p.unitsPerPack || ''}"`,
+            `"${p.gstRate || ''}"`,
+            `"${p.stock || ''}"`
+        ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'products.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    showToast('✓', 'Products CSV downloaded', 'success');
 }
 
 function downloadSampleCSV() {
-    const csv = 'name,category,company,price,description,stock\nParacetamol 500mg,Pain Relief,Cipla,₹120/strip,Effective pain and fever relief,In Stock\nAmoxicillin 250mg,Antibiotics,Sun Pharma,₹250/strip,Broad-spectrum antibiotic,In Stock\nVitamin D3 60K,Vitamins,Zydus,₹180/strip,Bone health supplement,In Stock';
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const csv = 'Company,Product Name,Composition,Description,Category,Price (₹),Packing Type,Units/Pack,GST Rate,Stock\nCipla,Paracetamol 500mg,Paracetamol 500mg,"Effective pain and fever relief",Pain Relief,120,Strip,10,12%,In Stock\nSun Pharma,Amoxicillin 250mg,Amoxicillin 250mg,"Broad-spectrum antibiotic",Antibiotics,250,Strip,10,12%,In Stock\nZydus,Vitamin D3 60K,Cholecalciferol 60000 IU,"Bone health supplement",Vitamins,180,Strip,4,12%,In Stock';
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -528,6 +737,7 @@ function updateProductCount() {
 // Drag and Drop
 function setupDragAndDrop() {
     const dropZone = document.getElementById('dropZone');
+    if (!dropZone) return; // Safeguard for pages without a drop zone
 
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, preventDefaults, false);

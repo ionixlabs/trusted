@@ -192,3 +192,58 @@ input[type="number"]::-webkit-outer-spin-button {
     background: rgba(0, 123, 255, 0.15);
     border-color: var(--success);
 }
+
+/* Packing Type Color Coding */
+.packing-strip {
+    background-color: #D6EAF8;
+    color: #1a5490;
+}
+
+.packing-alu-alu {
+    background-color: #D5F5E3;
+    color: #0d5c2e;
+}
+
+.packing-bottle {
+    background-color: #FADBD8;
+    color: #8b2635;
+}
+
+.packing-syrup {
+    background-color: #AED6F1;
+    color: #1a4470;
+}
+
+.packing-inhaler {
+    background-color: #EBDEF0;
+    color: #5b2c6f;
+}
+
+.packing-tube {
+    background-color: #FEF9E7;
+    color: #856404;
+}
+
+.packing-cream {
+    background-color: #FEF9E7;
+    color: #856404;
+}
+
+.packing-sachet {
+    background-color: #FDEDEC;
+    color: #8b2635;
+}
+
+.packing-lozenge {
+    background-color: #FCF3CF;
+    color: #856404;
+}
+
+.packing-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}

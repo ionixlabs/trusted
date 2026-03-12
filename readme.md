@@ -12,6 +12,7 @@ A modern, responsive e-commerce website for wholesale medicine distribution with
 - **Shopping Cart**: Add multiple products with adjustable quantities
 - **WhatsApp Integration**: Send product enquiries directly via WhatsApp
 - **Admin Panel**: Manage products by uploading CSV files or importing from Google Sheets
+- **Contact Actions**: Contact section now includes an "Open Enquiry Cart" button
 
 ### 📱 WhatsApp Integration
 - Direct product enquiry
@@ -22,6 +23,7 @@ A modern, responsive e-commerce website for wholesale medicine distribution with
 ### 🛠️ Admin Features
 - Upload CSV files with product data
 - Import products from Google Sheets
+- Download all products as CSV
 - Download sample CSV template
 - View total product count
 - Clear all products
@@ -31,8 +33,9 @@ A modern, responsive e-commerce website for wholesale medicine distribution with
 ```
 trusted/
 ├── index.html          # Main homepage with product catalog
-├── product.html        # Product detail pages
-├── script.js          # All JavaScript functionality
+├── products.html       # Full products listing page
+├── productdetial.html  # Product detail page (linked with ?id=)
+├── script.js           # Shared JavaScript functionality
 ├── styles.css          # Custom styling and animations
 └── readme.md           # This file
 ```
@@ -75,11 +78,12 @@ Each product contains:
 
 ## 📝 CSV Format
 
-Upload products using CSV with this format:
+Upload products using CSV with this format (matches Admin panel hints):
 ```csv
-name,category,company,price,description,stock
-Paracetamol 500mg,Pain Relief,Cipla,₹120/strip,Effective pain and fever relief,In Stock
-Amoxicillin 250mg,Antibiotics,Sun Pharma,₹250/strip,Broad-spectrum antibiotic,In Stock
+Company,Product Name,Composition,Description,Category,Price (₹),Packing Type,Units/Pack,GST Rate,Stock
+Cipla,Paracetamol 500mg,Paracetamol 500mg,Used to treat pain and reduce fever.,Pain Relief,120,Strip,10,12%,In Stock
+Sun Pharma,Amoxicillin 250mg,Amoxicillin 250mg,Used to treat a wide variety of bacterial infections.,Antibiotics,250,Strip,10,12%,In Stock
+Zydus,Vitamin D3 60K,Cholecalciferol 60000 IU,Used to treat and prevent vitamin D deficiency.,Vitamins,180,Strip,4,12%,In Stock
 ```
 
 ## 🚦 Getting Started
@@ -119,11 +123,19 @@ Amoxicillin 250mg,Antibiotics,Sun Pharma,₹250/strip,Broad-spectrum antibiotic,
 
 ## 📞 Contact Integration
 
-Replace WhatsApp number in `script.js`:
+Replace WhatsApp number in both `script.js` (cart and general chat) and `productdetial.html` (single product enquiry):
 ```javascript
+// script.js (cart / general chat)
 const whatsappUrl = `https://wa.me/919876543210?text=${encoded}`;
-// Change: +91 98765 43210 to your number
+
+// productdetial.html (direct product enquiry)
+const whatsappUrl = `https://wa.me/919876543210?text=${encoded}`;
 ```
+Change `919876543210` to your number in both places.
+
+The Contact section on `index.html` includes:
+- Chat on WhatsApp
+- Open Enquiry Cart (opens the slide-in cart to review and send enquiry)
 
 ## 🎨 Customization
 
@@ -170,6 +182,9 @@ Built with modern web technologies focusing on:
 ## 🐛 Bug Reports
 
 For issues or suggestions, please contact through the WhatsApp integration feature.
+
+### Troubleshooting
+- If the product detail page shows "Product information not available", ensure you navigated via links that include `?id=`. Cross-page initialization guards are in place to prevent this on direct loads.
 
 ## 📞 Support
 
